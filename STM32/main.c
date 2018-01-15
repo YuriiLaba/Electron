@@ -4,115 +4,83 @@
 #include "data_processing.h"
 
 
-//PA0 echo PC3 trigg `
-
-// Глобальные переменные
-uint8_t catcher_status = 0;     // Состояние ловушки: 0 - нарастающий фронт, 1 - спадающий
-uint16_t duration = 0;          // Длительность последнего пойманного импульса
+//PA0 echo PC3 trig
+//PC10 PC11 motor control pins`
 
 
+volatile uint8_t catcher_status = 0;     //status of echo interuption : 0 - rising edge, 1 - falling edge
+volatile uint16_t duration = 0;
 
-
-void Delay_ms(uint32_t ms)
-{
+void Delay_ms(uint32_t ms) {
   volatile uint32_t nCount;
   RCC_ClocksTypeDef RCC_Clocks;
   RCC_GetClocksFreq (&RCC_Clocks);
-
   nCount = (RCC_Clocks.HCLK_Frequency/10000)*ms;
   for (; nCount!=0; nCount--);
 }
 
-void init_ports()
-{
-//GPIO_InitTypeDef PORT;
-//  // Порт С, пин 3 - выход. Подключить к линии Trig модуля HC-SR04
-//  // Порт A, пин 0 - вход. Подключить к линии Echo модуля HC-SR04
-////  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
-//  RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOCEN;
-//  PORT.GPIO_Pin = GPIO_Pin_3;
-//  PORT.GPIO_Mode = GPIO_Mode_Out_PP;
-//  PORT.GPIO_Speed = GPIO_Speed_2MHz;
-//  GPIO_Init(GPIOC, &PORT);
+void initPorts() {
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOCEN |RCC_AHBENR_GPIOBEN;
 	GPIOC->MODER |= GPIO_MODER_MODER3_0;
-
 }
-
-void init_interrupts()
-{
-  //========================================================================
-  //                          Настройка таймера 6
-  // Используется для 2-х целей:
-  // 1) Подсчёт длительности Echo импульса (150 мкс - 25 мс)
-  // 2) Подсчёт с прерыванием для отчёта периода цикла - времени,
-  // необходимого для затухания остаточных колебаний в линии Echo
-  //========================================================================
-  // Включаем тактирование таймера
-//  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+//
+void init_interrupts() {
+  //use TIM6 for counting ECHO length
 	RCC->APB1ENR |= RCC_APB1ENR_TIM6EN;
+	TIM6->PSC = 24 - 1; //us prescaler
+	TIM6->ARR = 50000;  //count till 50 mc - time required for echo impulse to fade down
+	NVIC_SetPriority(TIM6_DAC_IRQn, 3); //interrupt required to count whole cycle length
+	NVIC_EnableIRQ(TIM6_DAC_IRQn);
 
-  // Выставляем предделитель на срабатывание раз в мкс
-  TIM6->PSC = 24 - 1;
-  // Граница срабатывания - 50 мс = 50 000 мкс
-  TIM6->ARR = 50000;
-  //Разрешение TIM6_IRQn прерывания - необходимо для отсчёта периода цикла
-  NVIC_SetPriority(TIM6_DAC_IRQn, 3);
-  NVIC_EnableIRQ(TIM6_DAC_IRQn);
-  //========================================================================
-  //                          Настройка таймера 7
-  //========================================================================
-  // Включаем тактирование таймера
-//  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
-  RCC->APB1ENR |= RCC_APB1ENR_TIM7EN;
-  // Выставляем предделитель на срабатывание раз в мкс
-  TIM7->PSC = 24 - 1;
-  // Граница срабатывания - 10 мкс
-  TIM7->ARR = 10;
-  //Разрешение TIM7_IRQn прерывания - необходимо для отсчёта сигнального импульса
-  NVIC_SetPriority(TIM7_IRQn, 2);
-  NVIC_EnableIRQ(TIM7_IRQn);
-  //========================================================================
-  //                          Настройка внешнего прерывания
-  // Внешние прерывания по умолчанию включены для всего порта A.
-  // Здесь используется 0-й пин порта А.
-  //========================================================================
-  // Включаем Alternate function I/O clock
-//  RCC_APB2PeriphClockCmd(RCC_APB2ENR_AFIOEN , ENABLE);
-  SYSCFG->EXTICR[0] &= (uint16_t)~SYSCFG_EXTICR1_EXTI0_PA;
-  // Прерывания от нулевой ноги разрешены
-  EXTI->IMR |= EXTI_IMR_MR0;
-  // Прерывания по нарастающему фронту
-  EXTI->RTSR |= EXTI_RTSR_TR0;
-  //Разрешаем прерывание
-  NVIC_SetPriority(EXTI0_1_IRQn, 1);
-  NVIC_EnableIRQ (EXTI0_1_IRQn);
+  //use TIM 7 for counting TRIG time
+	RCC->APB1ENR |= RCC_APB1ENR_TIM7EN;
+	TIM7->PSC = 24 - 1; //us prescaler
+    TIM7->ARR = 10;//count till 10 uc - time required for trigging ECHO impulse
+	NVIC_SetPriority(TIM7_IRQn, 2); //interrupt required for counting TRIG duration
+	NVIC_EnableIRQ(TIM7_IRQn);
+
+	//configure PA0 interrupts
+	SYSCFG->EXTICR[0] &= (uint16_t)~SYSCFG_EXTICR1_EXTI0_PA;
+	EXTI->IMR |= EXTI_IMR_MR0;
+	EXTI->RTSR |= EXTI_RTSR_TR0;
+	NVIC_SetPriority(EXTI0_1_IRQn, 1);
+	NVIC_EnableIRQ (EXTI0_1_IRQn);
 }
 
-int main(void)
-{
-              // Настройка USART для вывода printf в COM
-  init_ports();
-  init_interrupts();
-  USARTInit();
-  Array distances;
-  initArray(&distances, 150);
+int main(void) {
+
+	init_ports();
+	initMotor();
+	init_interrupts();
+	USARTInit();
+	Array distances;
+	initArray(&distances, 150);
+	uint8_t dir = 1;  //motor direction
 
 
+  // Set timer to count first 10us
+	TIM7->DIER |= TIM_DIER_UIE;          // allow TIM7 interrupts
+	GPIOC->ODR |= GPIO_Pin_3;            // turn on TRIG
+	TIM7->CR1 |= TIM_CR1_CEN;            // enable TIM7
 
-  // Запускаем таймер 7 первый раз на отсчёт 10 мс
-  TIM7->DIER |= TIM_DIER_UIE;          // Разрешаем прерывание от таймера 7
-  GPIOC->ODR |= GPIO_Pin_3;            // Включаем сигнальный импульс
-  TIM7->CR1 |= TIM_CR1_CEN;
-  // Запускаем таймер
-  int i = 0;
-  while(i != 60)
+	int i = 0;
+	while(i != 120)
     {
-      Delay_ms(500);
-      printf("S = %d mm, %d\n", duration/29, duration);
-      insertArray(&distances, duration / 29);
-      i++;
+		Delay_ms(500);
+		printf("S = %d mm, %d\n", duration/29, duration);
+		insertArray(&distances, duration / 29);
+		i++;
+		if (120 % 20) {
+			if (dir){
+				turnOnMotorDown();
+				dir = 0;
+			} else {
+				turnOnMotorUp();
+				dir = 1;
+			}
+    	}
     }
+    turnoffMotor();
     for (int i = 0; i < 6; i++) {
     	printf("%d \n", distances.array[i]);
     }
@@ -120,54 +88,48 @@ int main(void)
     sendToAndroid(processData(distances));
 }
 
-// Обработчик прерывания EXTI0: изменение уровня сигнала
-void EXTI0_1_IRQHandler(void)
-{
-  // Если поймали нарастающий фронт
-  if (!catcher_status)
-  {
-    // Запускаем отсчёт длительности импульса
-    TIM6->CR1 |= TIM_CR1_CEN;
-    // Переключаемся на отлов спадающего фронта
-    catcher_status = 1;
-    EXTI->RTSR &= ~EXTI_RTSR_TR0;
-    EXTI->FTSR |= EXTI_FTSR_TR0;
-  }
-  // Если поймали спадающий фронт
-  else
-  {
-    TIM6->CR1 &= ~TIM_CR1_CEN;         // Останавливаем таймер
-    duration = TIM6->CNT;              // Считываем значение длительности в мкс
-    TIM6->CNT = 0;                     // Обнуляем регистр-счётчик
-    // Переключаемся на отлов нарастающего фронта
-    catcher_status = 0;
-    EXTI->FTSR &= ~EXTI_FTSR_TR0;
-    EXTI->RTSR |= EXTI_RTSR_TR0;
-    // Запускаем таймер 6 на отсчёт 50 мс
-    TIM6->DIER |= TIM_DIER_UIE;        // Разрешаем прерывание от таймера
-    TIM6->CR1 |= TIM_CR1_CEN;          // Запускаем таймер
-  }
-  EXTI->PR |= 0x01;                    //Очищаем флаг
+
+void EXTI0_1_IRQHandler(void)	{
+
+	if ((EXTI->PR &= EXTI_PR_PR0) !=0 ) {
+		if (!catcher_status) {
+			TIM6->CR1 |= TIM_CR1_CEN; //start ECHO length counting
+			catcher_status = 1;
+			//switch to catching falling edge interrupts
+			EXTI->RTSR &= ~EXTI_RTSR_TR0;
+			EXTI->FTSR |= EXTI_FTSR_TR0;
+		} else {
+			TIM6->CR1 &= ~TIM_CR1_CEN;         // stop TIM6
+			duration = TIM6->CNT;              // get length of ECHO in us
+			TIM6->CNT = 0;
+			catcher_status = 0;
+			//switch to catching rising edge interrupts
+			EXTI->FTSR &= ~EXTI_FTSR_TR0;
+			EXTI->RTSR |= EXTI_RTSR_TR0;
+			// set timer to count 50 ms of whole cycle
+			TIM6->DIER |= TIM_DIER_UIE;        // enable TIM 6 interrupts
+			TIM6->CR1 |= TIM_CR1_CEN;		  // start TIM6
+		}
+	}
+	EXTI->PR |= 0x01;
 }
 
-// Обработчик прерывания TIM7_DAC
-// Вызывается после того, как таймер 7 отсчитал 10 мкс для сигнального импульса
-void TIM7_IRQHandler(void)
-{
-  TIM7->SR &= ~TIM_SR_UIF;             // Сбрасываем флаг UIF
-  GPIOC->ODR &= ~GPIO_Pin_3;           // Останавливаем сигнальный импульс
-  TIM7->DIER &= ~TIM_DIER_UIE;         // Запрещаем прерывание от таймера 7
+
+// called after TIM7 counted 10us for TRIG
+void TIM7_IRQHandler(void) {
+	TIM7->SR &= ~TIM_SR_UIF;
+	GPIOC->ODR &= ~GPIO_ODR_3;            // stop TRIG
+	TIM7->DIER &= ~TIM_DIER_UIE;		//forbid interrupts from TIM7
 }
 
-// Обработчик прерывания TIM6_DAC
-// Вызывается после того, как таймер 6 отсчитал 50 мкс для периода цикла
-void TIM6_DAC_IRQHandler(void)
-{
-  TIM6->SR &= ~TIM_SR_UIF;             // Сбрасываем флаг UIF
-  GPIOC->ODR |= GPIO_Pin_3;            // Включаем сигнальный импульс
-  // Запускаем таймер 7 на отсчёт 10 мс
-  TIM7->DIER |= TIM_DIER_UIE;          // Разрешаем прерывание от таймера 7
-  TIM7->CR1 |= TIM_CR1_CEN;            // Запускаем таймер
+
+// called after TIM6 counted 50ms for th whole cycle
+void TIM6_DAC_IRQHandler(void) {
+	  TIM6->SR &= ~TIM_SR_UIF;             //clear updtate interrupt
+	  GPIOC->ODR |= GPIO_ODR_3;            // start TRIG
+	  // start TIM7 for counting 10 us for TRIG
+	  TIM7->DIER |= TIM_DIER_UIE;
+	  TIM7->CR1 |= TIM_CR1_CEN;            // start TIM7
 }
 
 
