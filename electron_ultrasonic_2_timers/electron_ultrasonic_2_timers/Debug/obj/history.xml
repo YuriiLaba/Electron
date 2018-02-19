@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<history>
+   <processor signature="arm-none-eabi-gcc noversion nomachine -mcpu=cortex-m0 -mthumb -Wall -ffunction-sections -g -O0 -c -DSTM32F072RB -I..\..\..\workspace\electron_ultrasonic_2_timers\semihosting -I..\..\.. -I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_lib -I..\..\..\workspace\electron_ultrasonic_2_timers -I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_boot -I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_lib\include -I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_core -I..\..\..\workspace">
+      <target file="syscalls.o" lastModified="161ae6221e1">
+         <source file="..\..\..\syscalls\syscalls.c" lastModified="160f3cbdb97"/>
+      </target>
+      <target file="data_processing.o" lastModified="161ae62208c">
+         <source file="..\..\..\data_processing.c" lastModified="1616b5316cb"/>
+      </target>
+      <target file="stm32f0xx_gpio.o" lastModified="161ae622165">
+         <source file="..\..\..\cmsis_lib\source\stm32f0xx_gpio.c" lastModified="160f3cc5d18"/>
+      </target>
+      <target file="stm32f0xx_rcc.o" lastModified="161ae621e6d">
+         <source file="..\..\..\cmsis_lib\source\stm32f0xx_rcc.c" lastModified="160f3cc4551"/>
+      </target>
+      <target file="printf.o" lastModified="161ae621fdf">
+         <source file="..\..\..\stdio\printf.c" lastModified="160f3ccbe52"/>
+      </target>
+      <target file="Array.o" lastModified="161ae622318">
+         <source file="..\..\..\Array.c" lastModified="160f80e41df"/>
+      </target>
+      <target file="motor_control.o" lastModified="161ae621ec1">
+         <source file="..\..\..\motor_control.c" lastModified="160f64c81de"/>
+      </target>
+      <target file="main.o" lastModified="161ae621f26">
+         <source file="..\..\..\main.c" lastModified="161ae5859f2"/>
+      </target>
+      <target file="sh_cmd.o" lastModified="161ae62217b">
+         <source file="..\..\..\semihosting\sh_cmd.s" lastModified="160f3cc15bb"/>
+      </target>
+      <target file="semihosting.o" lastModified="161ae621dda">
+         <source file="..\..\..\semihosting\semihosting.c" lastModified="160f3cc15bb"/>
+      </target>
+      <target file="system_stm32f0xx.o" lastModified="161ae62238c">
+         <source file="..\..\..\cmsis_boot\system_stm32f0xx.c" lastModified="160f3cc2bf3"/>
+      </target>
+      <target file="startup_stm32f0xx.o" lastModified="161ae621f45">
+         <source file="..\..\..\cmsis_boot\startup\startup_stm32f0xx.s" lastModified="160f3cc2bd3"/>
+      </target>
+      <target file="USART.o" lastModified="161ae622454">
+         <source file="..\..\..\USART.c" lastModified="160f8e26db5"/>
+      </target>
+      <target file="HC_SR04.o" lastModified="161ae6220ea">
+         <source file="..\..\..\HC_SR04.c" lastModified="160f4bf380f"/>
+      </target>
+   </processor>
+</history>

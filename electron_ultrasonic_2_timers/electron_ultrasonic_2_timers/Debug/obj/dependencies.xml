@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dependencies>
+   <includePath signature="/I..\..\..\workspace\electron_ultrasonic_2_timers\semihosting /I..\..\.. /I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_lib /I..\..\..\workspace\electron_ultrasonic_2_timers /I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_boot /I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_lib\include /I..\..\..\workspace\electron_ultrasonic_2_timers\cmsis_core /I..\..\..\workspace">
+      <source file="..\..\..\HC_SR04.c" lastModified="160f4bf380f">
+      </source>
+      <source file="..\..\..\cmsis_boot\startup\startup_stm32f0xx.s" lastModified="160f3cc2bd3">
+      </source>
+      <source file="..\..\..\cmsis_boot\stm32f0xx.h" lastModified="160f3cc2fcb">
+         <include file="..\..\..\cmsis_core\core_cm0.h"/>
+         <include file="..\..\..\cmsis_boot\system_stm32f0xx.h"/>
+      </source>
+      <source file="..\..\..\motor_control.h" lastModified="160f4a0bcfd">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+      </source>
+      <source file="..\..\..\cmsis_lib\source\stm32f0xx_gpio.c" lastModified="160f3cc5d18">
+         <include file="..\..\..\cmsis_lib\include\stm32f0xx_gpio.h"/>
+         <include file="..\..\..\cmsis_lib\include\stm32f0xx_rcc.h"/>
+      </source>
+      <source file="..\..\..\motor_control.c" lastModified="160f64c81de">
+         <include file="..\..\..\motor_control.h"/>
+      </source>
+      <source file="..\..\..\data_processing.h" lastModified="1616b5207d2">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+         <include file="..\..\..\USART.h"/>
+         <include file="..\..\..\Array.h"/>
+      </source>
+      <source file="..\..\..\cmsis_core\core_cmInstr.h" lastModified="160f3cc0739">
+      </source>
+      <source file="..\..\..\cmsis_lib\source\stm32f0xx_rcc.c" lastModified="160f3cc4551">
+         <include file="..\..\..\cmsis_lib\include\stm32f0xx_rcc.h"/>
+      </source>
+      <source file="..\..\..\data_processing.c" lastModified="1616b5316cb">
+         <include file="..\..\..\data_processing.h"/>
+      </source>
+      <source file="..\..\..\USART.h" lastModified="160f4b5b046">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+      </source>
+      <source file="..\..\..\cmsis_lib\include\stm32f0xx_rcc.h" lastModified="160f3cc454c">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+      </source>
+      <source file="..\..\..\USART.c" lastModified="160f8e26db5">
+         <include file="..\..\..\USART.h"/>
+      </source>
+      <source file="..\..\..\stdio\printf.c" lastModified="160f3ccc622">
+      </source>
+      <source file="..\..\..\syscalls\syscalls.c" lastModified="160f3cbeb37">
+      </source>
+      <source file="..\..\..\Array.h" lastModified="160f80e3e56">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+      </source>
+      <source file="..\..\..\semihosting\semihosting.h" lastModified="160f3cc15bb">
+      </source>
+      <source file="..\..\..\Array.c" lastModified="160f80e41df">
+         <include file="..\..\..\Array.h"/>
+      </source>
+      <source file="..\..\..\main.c" lastModified="161ae5859f2">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+         <include file="..\..\..\semihosting\semihosting.h"/>
+         <include file="..\..\..\cmsis_lib\include\stm32f0xx_gpio.h"/>
+         <include file="..\..\..\cmsis_lib\include\stm32f0xx_rcc.h"/>
+         <include file="..\..\..\data_processing.h"/>
+      </source>
+      <source file="..\..\..\cmsis_lib\include\stm32f0xx_gpio.h" lastModified="160f3cc5d18">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+      </source>
+      <source file="..\..\..\cmsis_core\core_cm0.h" lastModified="160f3cc034e">
+         <include file="..\..\..\cmsis_core\core_cmInstr.h"/>
+         <include file="..\..\..\cmsis_core\core_cmFunc.h"/>
+      </source>
+      <source file="..\..\..\semihosting\sh_cmd.s" lastModified="160f3cc15bb">
+      </source>
+      <source file="..\..\..\semihosting\semihosting.c" lastModified="160f3cc1d8b">
+         <include file="..\..\..\semihosting\semihosting.h"/>
+      </source>
+      <source file="..\..\..\cmsis_core\core_cmFunc.h" lastModified="160f3cc0737">
+      </source>
+      <source file="..\..\..\cmsis_boot\system_stm32f0xx.h" lastModified="160f3cc2bf3">
+      </source>
+      <source file="..\..\..\cmsis_boot\system_stm32f0xx.c" lastModified="160f3cc2bf3">
+         <include file="..\..\..\cmsis_boot\stm32f0xx.h"/>
+      </source>
+   </includePath>
+</dependencies>
